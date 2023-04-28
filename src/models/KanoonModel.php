@@ -16,7 +16,7 @@ class KanoonModel extends MhaActiveRecord
   use \shopack\base\common\db\SoftDeleteActiveRecordTrait;
   public function initSoftDelete()
   {
-    $this->softdelete_RemovedStatus  = enuKanoonStatus::REMOVED;
+    $this->softdelete_RemovedStatus  = enuKanoonStatus::Removed;
     $this->softdelete_StatusField    = 'knnStatus';
     $this->softdelete_RemovedAtField = 'knnRemovedAt';
     $this->softdelete_RemovedByField = 'knnRemovedBy';

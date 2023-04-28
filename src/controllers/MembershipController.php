@@ -10,11 +10,13 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 use yii\data\ActiveDataProvider;
-use shopack\base\backend\controller\BaseRestController;
+use shopack\base\common\shop\ISaleableController;
 use shopack\base\backend\helpers\PrivHelper;
+use shopack\base\backend\controller\BaseRestController;
 use iranhmusic\shopack\mha\backend\models\MembershipModel;
+use iranhmusic\shopack\mha\backend\models\MemberMembershipModel;
 
-class MembershipController extends BaseRestController
+class MembershipController extends BaseRestController implements ISaleableController
 {
 	// public function behaviors()
 	// {
@@ -165,6 +167,13 @@ class MembershipController extends BaseRestController
 				'mshpRemovedBy' => $model->mshpRemovedBy,
 			// ],
 		];
+	}
+
+	//ISaleableController:
+	public function actionAddToBasket()
+	{
+		$base64Basketdata = $_POST['basketdata'] ?? [];
+		return MembershipModel::addToBasket($base64Basketdata);
 	}
 
 }

@@ -16,7 +16,7 @@ class DocumentModel extends MhaActiveRecord
   use \shopack\base\common\db\SoftDeleteActiveRecordTrait;
   public function initSoftDelete()
   {
-    $this->softdelete_RemovedStatus  = enuDocumentStatus::REMOVED;
+    $this->softdelete_RemovedStatus  = enuDocumentStatus::Removed;
     $this->softdelete_StatusField    = 'docType';
     $this->softdelete_RemovedAtField = 'docRemovedAt';
     $this->softdelete_RemovedByField = 'docRemovedBy';

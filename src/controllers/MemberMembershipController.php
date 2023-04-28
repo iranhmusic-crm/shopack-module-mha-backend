@@ -103,93 +103,114 @@ class MemberMembershipController extends BaseRestController
 		// return RESTfulHelper::modelToResponse($this->findModel($id));
 	}
 
-	public function actionCreate()
+	// public function actionCreate()
+	// {
+	// 	$justForMe = false;
+	// 	if (PrivHelper::hasPriv('mha/member-membership/crud', '1000') == false) {
+	// 		$justForMe = true;
+	// 	}
+
+	// 	$model = new MemberMembershipModel();
+	// 	if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
+	// 		throw new NotFoundHttpException("parameters not provided");
+
+	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+	// 		throw new ForbiddenHttpException('access denied');
+
+	// 	try {
+	// 		if ($model->save() == false)
+	// 			throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
+	// 	} catch(\Exception $exp) {
+	// 		$msg = $exp->getMessage();
+	// 		if (stripos($msg, 'duplicate entry') !== false)
+	// 			$msg = 'DUPLICATE';
+	// 		throw new UnprocessableEntityHttpException($msg);
+	// 	}
+
+	// 	return [
+	// 		// 'result' => [
+	// 			// 'message' => 'created',
+	// 			// 'mbrshpID' => $model->mbrshpID,
+	// 			// 'mbrStatus' => $model->mbrshpStatus,
+	// 			'mbrshpCreatedAt' => $model->mbrshpCreatedAt,
+	// 			'mbrshpCreatedBy' => $model->mbrshpCreatedBy,
+	// 		// ],
+	// 	];
+	// }
+
+	// public function actionUpdate($id)
+	// {
+	// 	$justForMe = false;
+	// 	if (PrivHelper::hasPriv('mha/member-membership/crud', '0010') == false) {
+	// 		$justForMe = true;
+	// 	}
+
+	// 	$model = $this->findModel($id);
+	// 	if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
+	// 		throw new NotFoundHttpException("parameters not provided");
+
+	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+	// 		throw new ForbiddenHttpException('access denied');
+
+	// 	if ($model->save() == false)
+	// 		throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
+
+	// 	return [
+	// 		// 'result' => [
+	// 			// 'message' => 'updated',
+	// 			// 'mbrUserID' => $model->mbrUserID,
+	// 			// 'mbrStatus' => $model->mbrStatus,
+	// 			'mbrshpUpdatedAt' => $model->mbrshpUpdatedAt,
+	// 			'mbrshpUpdatedBy' => $model->mbrshpUpdatedBy,
+	// 		// ],
+	// 	];
+	// }
+
+	// public function actionDelete($id)
+	// {
+	// 	$justForMe = false;
+	// 	if (PrivHelper::hasPriv('mha/member-membership/crud', '0001') == false) {
+	// 		$justForMe = true;
+	// 	}
+
+	// 	$model = $this->findModel($id);
+
+	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+	// 		throw new ForbiddenHttpException('access denied');
+
+	// 	if ($model->delete() === false)
+	// 		throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
+
+	// 	return [
+	// 		'result' => 'ok',
+	// 		// 'result' => [
+	// 			// 'message' => 'deleted',
+	// 			// 'mbrUserID' => $model->mbrUserID,
+	// 			// 'mbrStatus' => $model->mbrStatus,
+	// 			// 'mbrshpRemovedAt' => $model->mbrshpRemovedAt,
+	// 			// 'mbrshpRemovedBy' => $model->mbrshpRemovedBy,
+	// 		// ],
+	// 	];
+	// }
+
+	public function actionRenewalInfo($memberID = null)
 	{
-		$justForMe = false;
-		if (PrivHelper::hasPriv('mha/member-membership/crud', '1000') == false) {
-			$justForMe = true;
-		}
-
-		$model = new MemberMembershipModel();
-		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
-			throw new NotFoundHttpException("parameters not provided");
-
-		if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+		if ($memberID == null)
+			$memberID = Yii::$app->user->identity->usrID;
+		else if (($memberID != Yii::$app->user->identity->usrID)
+				&& (PrivHelper::hasPriv('mha/member-membership/crud', '0100') == false)) {
 			throw new ForbiddenHttpException('access denied');
-
-		try {
-			if ($model->save() == false)
-				throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
-		} catch(\Exception $exp) {
-			$msg = $exp->getMessage();
-			if (stripos($msg, 'duplicate entry') !== false)
-				$msg = 'DUPLICATE';
-			throw new UnprocessableEntityHttpException($msg);
 		}
+
+		list ($startDate, $endDate, $years, $unitPrice, $totalPrice, $saleableID) = MemberMembershipModel::getRenewalInfo($memberID);
 
 		return [
-			// 'result' => [
-				// 'message' => 'created',
-				// 'mbrshpID' => $model->mbrshpID,
-				// 'mbrStatus' => $model->mbrshpStatus,
-				'mbrshpCreatedAt' => $model->mbrshpCreatedAt,
-				'mbrshpCreatedBy' => $model->mbrshpCreatedBy,
-			// ],
-		];
-	}
-
-	public function actionUpdate($id)
-	{
-		$justForMe = false;
-		if (PrivHelper::hasPriv('mha/member-membership/crud', '0010') == false) {
-			$justForMe = true;
-		}
-
-		$model = $this->findModel($id);
-		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
-			throw new NotFoundHttpException("parameters not provided");
-
-		if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
-			throw new ForbiddenHttpException('access denied');
-
-		if ($model->save() == false)
-			throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
-
-		return [
-			// 'result' => [
-				// 'message' => 'updated',
-				// 'mbrUserID' => $model->mbrUserID,
-				// 'mbrStatus' => $model->mbrStatus,
-				'mbrshpUpdatedAt' => $model->mbrshpUpdatedAt,
-				'mbrshpUpdatedBy' => $model->mbrshpUpdatedBy,
-			// ],
-		];
-	}
-
-	public function actionDelete($id)
-	{
-		$justForMe = false;
-		if (PrivHelper::hasPriv('mha/member-membership/crud', '0001') == false) {
-			$justForMe = true;
-		}
-
-		$model = $this->findModel($id);
-
-		if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
-			throw new ForbiddenHttpException('access denied');
-
-		if ($model->delete() === false)
-			throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
-
-		return [
-			'result' => 'ok',
-			// 'result' => [
-				// 'message' => 'deleted',
-				// 'mbrUserID' => $model->mbrUserID,
-				// 'mbrStatus' => $model->mbrStatus,
-				// 'mbrshpRemovedAt' => $model->mbrshpRemovedAt,
-				// 'mbrshpRemovedBy' => $model->mbrshpRemovedBy,
-			// ],
+			'startDate'		=> $startDate,
+			'endDate'			=> $endDate,
+			'years'				=> $years,
+			'unitPrice'		=> $unitPrice,
+			'totalPrice'	=> $totalPrice,
+			'saleableID'	=> $saleableID,
 		];
 	}
 

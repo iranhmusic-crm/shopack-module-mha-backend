@@ -17,7 +17,7 @@ class SpecialtyModel extends MhaActiveRecord
   use \shopack\base\common\db\SoftDeleteActiveRecordTrait;
   public function initSoftDelete()
   {
-    $this->softdelete_RemovedStatus  = enuSpecialtyStatus::REMOVED;
+    $this->softdelete_RemovedStatus  = enuSpecialtyStatus::Removed;
     $this->softdelete_StatusField    = 'spcStatus';
     $this->softdelete_RemovedAtField = 'spcRemovedAt';
     $this->softdelete_RemovedByField = 'spcRemovedBy';

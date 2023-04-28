@@ -6,17 +6,27 @@
 namespace iranhmusic\shopack\mha\backend;
 
 use yii\base\BootstrapInterface;
+use shopack\base\common\shop\ShopModuleTrait;
+use iranhmusic\shopack\mha\backend\models\MembershipModel;
+use iranhmusic\shopack\mha\backend\models\MemberMembershipModel;
 
 class Module
 	extends \shopack\base\common\base\BaseModule
 	implements BootstrapInterface
 {
+	use ShopModuleTrait;
+
+	//used for trust message channel
+	public $servicePrivateKey;
+
 	public function init()
 	{
 		if (empty($this->id))
 			$this->id = 'mha';
 
 		parent::init();
+
+		$this->registerSaleable(MembershipModel::class, MemberMembershipModel::class);
 	}
 
 	public function bootstrap($app)
@@ -120,12 +130,20 @@ class Module
 					// 'prefix' => 'v1',
 					'controller' => [$this->id . '/membership'],
 					'pluralize' => false,
+
+					'extraPatterns' => [
+						'POST add-to-basket' => 'add-to-basket',
+					],
 				],
 				[
 					'class' => \yii\rest\UrlRule::class,
 					// 'prefix' => 'v1',
 					'controller' => [$this->id . '/member-membership'],
 					'pluralize' => false,
+
+					'extraPatterns' => [
+						'GET renewal-info' => 'renewal-info',
+					],
 				],
 				[
 					'class' => \yii\rest\UrlRule::class,
@@ -141,6 +159,26 @@ class Module
 					// 'prefix' => 'v1',
 					'controller' => [$this->id . '/member-document'],
 					'pluralize' => false,
+				],
+				[
+					'class' => \yii\rest\UrlRule::class,
+					// 'prefix' => 'v1',
+					'controller' => [$this->id . '/basket'],
+					'pluralize' => false,
+
+					'tokens' => [
+						'{uuid}' => '<uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}>',
+					],
+
+					'patterns' => [
+						// 'GET,HEAD'					=> 'index',
+						// 'GET,HEAD {uuid}'		=> 'view',
+						'POST'							=> 'create',
+						'PUT,PATCH {uuid}'	=> 'update',
+						'DELETE {uuid}'			=> 'delete',
+						'{uuid}'						=> 'options',
+						''									=> 'options',
+					],
 				],
 			];
 

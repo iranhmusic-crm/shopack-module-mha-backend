@@ -17,7 +17,7 @@ class MemberModel extends MhaActiveRecord
   use \shopack\base\common\db\SoftDeleteActiveRecordTrait;
   public function initSoftDelete()
   {
-    $this->softdelete_RemovedStatus  = enuMemberStatus::REMOVED;
+    $this->softdelete_RemovedStatus  = enuMemberStatus::Removed;
     $this->softdelete_StatusField    = 'mbrStatus';
     $this->softdelete_RemovedAtField = 'mbrRemovedAt';
     $this->softdelete_RemovedByField = 'mbrRemovedBy';
