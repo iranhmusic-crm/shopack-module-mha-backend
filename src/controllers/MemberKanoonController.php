@@ -29,9 +29,7 @@ class MemberKanoonController extends BaseRestController
 
 	protected function findModel($id)
 	{
-		if (($model = MemberKanoonModel::findOne([
-					'mbrknnID' => $id,
-				])) !== null)
+		if (($model = MemberKanoonModel::findOne(['mbrknnID' => $id])) !== null)
 			return $model;
 
 		throw new NotFoundHttpException('The requested item not exist.');
@@ -41,13 +39,13 @@ class MemberKanoonController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-kanoon/crud', '0100') == false)
-			$filter = ['mbrknnMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrknnMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberKanoonModel;
 		$query = $searchModel::find()
 			->select(MemberKanoonModel::selectableColumns())
-			->with('member.user')
-			->with('kanoon')
+			->joinWith('member.user')
+			->joinWith('kanoon')
 			->asArray()
 		;
 
@@ -84,15 +82,15 @@ class MemberKanoonController extends BaseRestController
 
 		$model = MemberKanoonModel::find()
 			->select(MemberKanoonModel::selectableColumns())
-			->with('member.user')
-			->with('kanoon')
+			->joinWith('member.user')
+			->joinWith('kanoon')
 			->andWhere(['mbrknnID' => $id])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -114,7 +112,7 @@ class MemberKanoonController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		try {
@@ -149,7 +147,7 @@ class MemberKanoonController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->save() == false)
@@ -175,7 +173,7 @@ class MemberKanoonController extends BaseRestController
 
 		$model = $this->findModel($id);
 
-		if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrknnMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->delete() === false)

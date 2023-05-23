@@ -41,13 +41,13 @@ class MemberMembershipController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-membership/crud', '0100') == false)
-			$filter = ['mbrshpMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrshpMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberMembershipModel;
 		$query = $searchModel::find()
 			->select(MemberMembershipModel::selectableColumns())
-			->with('member.user')
-			->with('membership')
+			->joinWith('member.user')
+			->joinWith('membership')
 			->asArray()
 		;
 
@@ -84,15 +84,15 @@ class MemberMembershipController extends BaseRestController
 
 		$model = MemberMembershipModel::find()
 			->select(MemberMembershipModel::selectableColumns())
-			->with('member.user')
-			->with('membership')
+			->joinWith('member.user')
+			->joinWith('membership')
 			->andWhere(['mbrshpID' => $id])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -114,7 +114,7 @@ class MemberMembershipController extends BaseRestController
 	// 	if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 	// 		throw new NotFoundHttpException("parameters not provided");
 
-	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->id))
 	// 		throw new ForbiddenHttpException('access denied');
 
 	// 	try {
@@ -149,7 +149,7 @@ class MemberMembershipController extends BaseRestController
 	// 	if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 	// 		throw new NotFoundHttpException("parameters not provided");
 
-	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->id))
 	// 		throw new ForbiddenHttpException('access denied');
 
 	// 	if ($model->save() == false)
@@ -175,7 +175,7 @@ class MemberMembershipController extends BaseRestController
 
 	// 	$model = $this->findModel($id);
 
-	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->identity->usrID))
+	// 	if ($justForMe && ($model->mbrshpMemberID != Yii::$app->user->id))
 	// 		throw new ForbiddenHttpException('access denied');
 
 	// 	if ($model->delete() === false)
@@ -196,8 +196,8 @@ class MemberMembershipController extends BaseRestController
 	public function actionRenewalInfo($memberID = null)
 	{
 		if ($memberID == null)
-			$memberID = Yii::$app->user->identity->usrID;
-		else if (($memberID != Yii::$app->user->identity->usrID)
+			$memberID = Yii::$app->user->id;
+		else if (($memberID != Yii::$app->user->id)
 				&& (PrivHelper::hasPriv('mha/member-membership/crud', '0100') == false)) {
 			throw new ForbiddenHttpException('access denied');
 		}

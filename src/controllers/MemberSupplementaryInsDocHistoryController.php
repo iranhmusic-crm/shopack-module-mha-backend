@@ -41,12 +41,12 @@ class MemberSupplementaryInsDocHistoryController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-supplementary-ins-doc/crud', '0100') == false)
-			$filter = ['mbrsinsdocMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrsinsdocMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberSupplementaryInsDocHistoryModel;
 		$query = $searchModel::find()
 			->select(MemberSupplementaryInsDocHistoryModel::selectableColumns())
-			->with('memberSupplementaryInsDoc.member.user')
+			->joinWith('memberSupplementaryInsDoc.member.user')
 			->asArray()
 		;
 
@@ -84,14 +84,14 @@ class MemberSupplementaryInsDocHistoryController extends BaseRestController
 
 		$model = MemberSupplementaryInsDocHistoryModel::find()
 			->select(MemberSupplementaryInsDocHistoryModel::selectableColumns())
-			->with('memberSupplementaryInsDoc.member.user')
+			->joinWith('memberSupplementaryInsDoc.member.user')
 			->andWhere(['mbrsinsdochstID' => $id])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -113,7 +113,7 @@ class MemberSupplementaryInsDocHistoryController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		try {
@@ -148,7 +148,7 @@ class MemberSupplementaryInsDocHistoryController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->save() == false)
@@ -174,7 +174,7 @@ class MemberSupplementaryInsDocHistoryController extends BaseRestController
 
 		$model = $this->findModel($id);
 
-		if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrsinsdochstSupplementaryInsDocID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->delete() === false)

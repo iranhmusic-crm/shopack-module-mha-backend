@@ -41,13 +41,13 @@ class MemberMasterInsuranceController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-master-insurance/crud', '0100') == false)
-			$filter = ['mbrminshstMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrminshstMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberMasterInsuranceModel;
 		$query = $searchModel::find()
 			->select(MemberMasterInsuranceModel::selectableColumns())
-			->with('member.user')
-			->with('masterInsuranceType')
+			->joinWith('member.user')
+			->joinWith('masterInsuranceType')
 			->asArray()
 		;
 
@@ -84,15 +84,15 @@ class MemberMasterInsuranceController extends BaseRestController
 
 		$model = MemberMasterInsuranceModel::find()
 			->select(MemberMasterInsuranceModel::selectableColumns())
-			->with('member.user')
-			->with('masterInsuranceType')
+			->joinWith('member.user')
+			->joinWith('masterInsuranceType')
 			->andWhere(['mbrminshstID' => $id])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -114,7 +114,7 @@ class MemberMasterInsuranceController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		try {
@@ -149,7 +149,7 @@ class MemberMasterInsuranceController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->save() == false)
@@ -175,7 +175,7 @@ class MemberMasterInsuranceController extends BaseRestController
 
 		$model = $this->findModel($id);
 
-		if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrminshstMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->delete() === false)

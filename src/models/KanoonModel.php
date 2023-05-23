@@ -17,7 +17,7 @@ class KanoonModel extends MhaActiveRecord
   public function initSoftDelete()
   {
     $this->softdelete_RemovedStatus  = enuKanoonStatus::Removed;
-    $this->softdelete_StatusField    = 'knnStatus';
+    // $this->softdelete_StatusField    = 'knnStatus';
     $this->softdelete_RemovedAtField = 'knnRemovedAt';
     $this->softdelete_RemovedByField = 'knnRemovedBy';
 	}
@@ -39,5 +39,13 @@ class KanoonModel extends MhaActiveRecord
 			],
 		];
 	}
+
+	public function save($runValidation = true, $attributeNames = null)
+  {
+		if (empty($this->knnDescFieldType) && (empty($this->knnDescFieldLabel) == false))
+			$this->knnDescFieldLabel = null;
+
+    return parent::save($runValidation, $attributeNames);
+  }
 
 }

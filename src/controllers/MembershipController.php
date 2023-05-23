@@ -40,7 +40,7 @@ class MembershipController extends BaseRestController implements ISaleableContro
 	public function actionIndex()
 	{
 		$filter = [];
-		PrivHelper::checkPriv('mha/membership/crud', '0100');
+		// PrivHelper::checkPriv('mha/membership/crud', '0100');
 
 		$searchModel = new MembershipModel;
 		$query = $searchModel::find()
@@ -77,7 +77,7 @@ class MembershipController extends BaseRestController implements ISaleableContro
 
 	public function actionView($id)
 	{
-		PrivHelper::checkPriv('mha/membership/crud', '0100');
+		// PrivHelper::checkPriv('mha/membership/crud', '0100');
 
 		$model = MembershipModel::find()
 			->select(MembershipModel::selectableColumns())

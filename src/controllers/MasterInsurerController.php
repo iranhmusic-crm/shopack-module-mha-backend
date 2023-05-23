@@ -38,7 +38,7 @@ class MasterInsurerController extends BaseRestController
 	public function actionIndex()
 	{
 		$filter = [];
-		PrivHelper::checkPriv('mha/master-insurer/crud', '0100');
+		// PrivHelper::checkPriv('mha/master-insurer/crud', '0100');
 
 		$searchModel = new MasterInsurerModel;
 		$query = $searchModel::find()
@@ -75,7 +75,7 @@ class MasterInsurerController extends BaseRestController
 
 	public function actionView($id)
 	{
-		PrivHelper::checkPriv('mha/master-insurer/crud', '0100');
+		// PrivHelper::checkPriv('mha/master-insurer/crud', '0100');
 
 		$model = MasterInsurerModel::find()
 			->select(MasterInsurerModel::selectableColumns())

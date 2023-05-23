@@ -41,13 +41,13 @@ class MemberSponsorshipController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-sponsorship/crud', '0100') == false)
-			$filter = ['mbrspsMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrspsMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberSponsorshipModel;
 		$query = $searchModel::find()
 			->select(MemberSponsorshipModel::selectableColumns())
-			->with('member.user')
-			->with('masterInsuranceType')
+			->joinWith('member.user')
+			->joinWith('masterInsuranceType')
 			->asArray()
 		;
 
@@ -84,15 +84,15 @@ class MemberSponsorshipController extends BaseRestController
 
 		$model = MemberSponsorshipModel::find()
 			->select(MemberSponsorshipModel::selectableColumns())
-			->with('member.user')
-			->with('masterInsuranceType')
+			->joinWith('member.user')
+			->joinWith('masterInsuranceType')
 			->andWhere(['mbrspsID' => $id])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -114,7 +114,7 @@ class MemberSponsorshipController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		try {
@@ -149,7 +149,7 @@ class MemberSponsorshipController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->save() == false)
@@ -175,7 +175,7 @@ class MemberSponsorshipController extends BaseRestController
 
 		$model = $this->findModel($id);
 
-		if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrspsMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->delete() === false)

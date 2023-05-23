@@ -17,7 +17,7 @@ class SupplementaryInsurerModel extends MhaActiveRecord
   public function initSoftDelete()
   {
     $this->softdelete_RemovedStatus  = enuInsurerStatus::Removed;
-    $this->softdelete_StatusField    = 'sinsStatus';
+    // $this->softdelete_StatusField    = 'sinsStatus';
     $this->softdelete_RemovedAtField = 'sinsRemovedAt';
     $this->softdelete_RemovedByField = 'sinsRemovedBy';
 	}

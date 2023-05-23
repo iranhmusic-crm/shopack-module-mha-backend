@@ -13,6 +13,7 @@ use yii\data\ActiveDataProvider;
 use shopack\base\backend\controller\BaseRestController;
 use shopack\base\backend\helpers\PrivHelper;
 use iranhmusic\shopack\mha\backend\models\KanoonModel;
+use iranhmusic\shopack\mha\backend\models\KanoonSendMessageForm;
 
 class KanoonController extends BaseRestController
 {
@@ -38,18 +39,18 @@ class KanoonController extends BaseRestController
 	public function actionIndex()
 	{
 		$filter = [];
-		PrivHelper::checkPriv('mha/kanoon/crud', '0100');
+		// PrivHelper::checkPriv('mha/kanoon/crud', '0100');
 
 		$searchModel = new KanoonModel;
 		$query = $searchModel::find()
 			->select(KanoonModel::selectableColumns())
-			->with('president')
-			->with('vicePresident')
-			->with('ozv1')
-			->with('ozv2')
-			->with('ozv3')
-			->with('warden')
-			->with('talker')
+			->joinWith('president')
+			->joinWith('vicePresident')
+			->joinWith('ozv1')
+			->joinWith('ozv2')
+			->joinWith('ozv3')
+			->joinWith('warden')
+			->joinWith('talker')
 			->with('createdByUser')
 			->with('updatedByUser')
 			->with('removedByUser')
@@ -82,17 +83,17 @@ class KanoonController extends BaseRestController
 
 	public function actionView($id)
 	{
-		PrivHelper::checkPriv('mha/kanoon/crud', '0100');
+		// PrivHelper::checkPriv('mha/kanoon/crud', '0100');
 
 		$model = KanoonModel::find()
 			->select(KanoonModel::selectableColumns())
-			->with('president')
-			->with('vicePresident')
-			->with('ozv1')
-			->with('ozv2')
-			->with('ozv3')
-			->with('warden')
-			->with('talker')
+			->joinWith('president')
+			->joinWith('vicePresident')
+			->joinWith('ozv1')
+			->joinWith('ozv2')
+			->joinWith('ozv3')
+			->joinWith('warden')
+			->joinWith('talker')
 			->with('createdByUser')
 			->with('updatedByUser')
 			->with('removedByUser')
@@ -179,6 +180,29 @@ class KanoonController extends BaseRestController
 				'knnRemovedBy' => $model->knnRemovedBy,
 			// ],
 		];
+	}
+
+	public function actionSendMessage()
+	{
+		$model = new KanoonSendMessageForm();
+
+		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
+			throw new NotFoundHttpException("parameters not provided");
+
+		try {
+			$result = $model->process();
+
+			if ($result === false)
+				throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
+
+			return $result;
+
+		} catch(\Exception $exp) {
+			$msg = $exp->getMessage();
+			if (stripos($msg, 'duplicate entry') !== false)
+				$msg = 'DUPLICATE';
+			throw new UnprocessableEntityHttpException($msg);
+		}
 	}
 
 }

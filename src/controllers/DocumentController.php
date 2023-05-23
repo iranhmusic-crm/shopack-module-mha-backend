@@ -38,7 +38,7 @@ class DocumentController extends BaseRestController
 	public function actionIndex()
 	{
 		$filter = [];
-		PrivHelper::checkPriv('mha/document/crud', '0100');
+		// PrivHelper::checkPriv('mha/document/crud', '0100');
 
 		$searchModel = new DocumentModel;
 		$query = $searchModel::find()
@@ -75,7 +75,7 @@ class DocumentController extends BaseRestController
 
 	public function actionView($id)
 	{
-		PrivHelper::checkPriv('mha/document/crud', '0100');
+		// PrivHelper::checkPriv('mha/document/crud', '0100');
 
 		$model = DocumentModel::find()
 			->select(DocumentModel::selectableColumns())
@@ -170,7 +170,7 @@ class DocumentController extends BaseRestController
 	public function actionMemberDocumentTypes($memberID)
 	{
 		if (PrivHelper::hasPriv('mha/document/crud', '0100') == false) {
-			if (Yii::$app->user->identity->usrID != $memberID)
+			if (Yii::$app->user->id != $memberID)
 				throw new ForbiddenHttpException('access denied');
 		}
 

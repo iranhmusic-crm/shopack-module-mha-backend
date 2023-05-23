@@ -17,7 +17,7 @@ class MasterInsurerTypeModel extends MhaActiveRecord
   public function initSoftDelete()
   {
     $this->softdelete_RemovedStatus  = enuInsurerStatus::Removed;
-    $this->softdelete_StatusField    = 'minstypStatus';
+    // $this->softdelete_StatusField    = 'minstypStatus';
     $this->softdelete_RemovedAtField = 'minstypRemovedAt';
     $this->softdelete_RemovedByField = 'minstypRemovedBy';
 	}

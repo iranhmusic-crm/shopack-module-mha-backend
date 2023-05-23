@@ -12,8 +12,9 @@ use yii\web\UnprocessableEntityHttpException;
 use yii\data\ActiveDataProvider;
 use shopack\base\backend\controller\BaseRestController;
 use shopack\base\backend\helpers\PrivHelper;
-use iranhmusic\shopack\mha\backend\models\MemberModel;
 use shopack\aaa\backend\models\UserModel;
+use iranhmusic\shopack\mha\backend\models\MemberModel;
+use iranhmusic\shopack\mha\backend\models\MemberSignupForm;
 
 class MemberController extends BaseRestController
 {
@@ -40,7 +41,7 @@ class MemberController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member/crud', '0100') == false)
-			$filter = ['mbrUserID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrUserID' => Yii::$app->user->id];
 
 		$searchModel = new MemberModel;
 		$query = $searchModel::find()
@@ -94,13 +95,13 @@ class MemberController extends BaseRestController
 	public function actionView($id)
 	{
 		if (PrivHelper::hasPriv('mha/member/crud', '0100') == false) {
-			if (Yii::$app->user->identity->usrID != $id)
+			if (Yii::$app->user->id != $id)
 				throw new ForbiddenHttpException('access denied');
 		}
 
 		$model = MemberModel::find()
 			->select(MemberModel::selectableColumns())
-			->with('user')
+			->joinWith('user')
 			->with('createdByUser')
 			->with('updatedByUser')
 			->with('removedByUser')
@@ -149,7 +150,7 @@ class MemberController extends BaseRestController
 	public function actionUpdate($id)
 	{
 		if (PrivHelper::hasPriv('mha/member/crud', '0010') == false) {
-			if (Yii::$app->user->identity->usrID != $id)
+			if (Yii::$app->user->id != $id)
 				throw new ForbiddenHttpException('access denied');
 		}
 
@@ -175,7 +176,7 @@ class MemberController extends BaseRestController
 	public function actionDelete($id)
 	{
 		if (PrivHelper::hasPriv('mha/member/crud', '0001') == false) {
-			if (Yii::$app->user->identity->usrID != $id)
+			if (Yii::$app->user->id != $id)
 				throw new ForbiddenHttpException('access denied');
 		}
 
@@ -193,6 +194,35 @@ class MemberController extends BaseRestController
 				'mbrRemovedBy' => $model->mbrRemovedBy,
 			// ],
 		];
+	}
+
+	public function actionSignup()
+	{
+		$model = new MemberSignupForm;
+
+		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
+			throw new NotFoundHttpException("parameters not provided");
+
+		if (PrivHelper::hasPriv('mha/member/crud', '1000') == false) {
+			if ($model->mbrUserID != Yii::$app->user->id)
+				throw new ForbiddenHttpException('access denied');
+		}
+
+		try {
+			$result = $model->signup();
+
+			if ($result == false)
+				throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
+
+			return $result;
+
+		} catch(\Exception $exp) {
+			$msg = $exp->getMessage();
+			if (stripos($msg, 'duplicate entry') !== false)
+				$msg = 'DUPLICATE';
+
+			throw new UnprocessableEntityHttpException($msg);
+		}
 	}
 
 }

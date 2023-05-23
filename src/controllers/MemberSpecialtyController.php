@@ -27,12 +27,20 @@ class MemberSpecialtyController extends BaseRestController
 		return 'options';
 	}
 
-	protected function findModel($mbrid, $spcid)
+	// protected function findModel($mbrid, $spcid)
+	// {
+	// 	if (($model = MemberSpecialtyModel::findOne([
+	// 				'mbrspcMemberID' => $mbrid,
+	// 				'mbrspcSpecialtyID' => $spcid,
+	// 			])) !== null)
+	// 		return $model;
+
+	// 	throw new NotFoundHttpException('The requested item not exist.');
+	// }
+
+	protected function findModel($id)
 	{
-		if (($model = MemberSpecialtyModel::findOne([
-					'mbrspcMemberID' => $mbrid,
-					'mbrspcSpecialtyID' => $spcid,
-				])) !== null)
+		if (($model = MemberSpecialtyModel::findOne($id)) !== null)
 			return $model;
 
 		throw new NotFoundHttpException('The requested item not exist.');
@@ -42,13 +50,13 @@ class MemberSpecialtyController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-specialty/crud', '0100') == false)
-			$filter = ['mbrspcMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrspcMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberSpecialtyModel;
 		$query = $searchModel::find()
 			->select(MemberSpecialtyModel::selectableColumns())
-			->with('member.user')
-			->with('specialty')
+			->joinWith('member.user')
+			->joinWith('specialty')
 			->asArray()
 		;
 
@@ -76,7 +84,7 @@ class MemberSpecialtyController extends BaseRestController
 		];
 	}
 
-	public function actionView($mbrid, $spcid)
+	public function actionView($id) //$mbrid, $spcid)
 	{
 		$justForMe = false;
 		if (PrivHelper::hasPriv('mha/member-specialty/crud', '0100') == false) {
@@ -85,16 +93,17 @@ class MemberSpecialtyController extends BaseRestController
 
 		$model = MemberSpecialtyModel::find()
 			->select(MemberSpecialtyModel::selectableColumns())
-			->with('member.user')
-			->with('specialty')
-			->andWhere(['mbrspcMemberID' => $mbrid])
-			->andWhere(['mbrspcSpecialtyID' => $spcid])
+			->joinWith('member.user')
+			->joinWith('specialty')
+			->andWhere(['mbrspcID' => $id])
+			// ->andWhere(['mbrspcMemberID' => $mbrid])
+			// ->andWhere(['mbrspcSpecialtyID' => $spcid])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrspcMemberID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrspcMemberID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -107,11 +116,17 @@ class MemberSpecialtyController extends BaseRestController
 
 	public function actionCreate()
 	{
-		PrivHelper::checkPriv('mha/member-specialty/crud', '1000');
+		$justForMe = false;
+		if (PrivHelper::hasPriv('mha/member-specialty/crud', '1000')) {
+			$justForMe = true;
+		}
 
 		$model = new MemberSpecialtyModel();
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
+
+		if ($justForMe && ($model->mbrspcMemberID != Yii::$app->user->id))
+			throw new ForbiddenHttpException('access denied');
 
 		try {
 			if ($model->save() == false)
@@ -128,23 +143,25 @@ class MemberSpecialtyController extends BaseRestController
 				// 'message' => 'created',
 				// 'mbrspcID' => $model->mbrspcID,
 				// 'mbrStatus' => $model->mbrspcStatus,
-				'mbrCreatedAt' => $model->mbrspcCreatedAt,
-				'mbrCreatedBy' => $model->mbrspcCreatedBy,
+				'mbrspcCreatedAt' => $model->mbrspcCreatedAt,
+				'mbrspcCreatedBy' => $model->mbrspcCreatedBy,
 			// ],
 		];
 	}
 
-	public function actionUpdate($mbrid, $spcid)
+	public function actionUpdate($id) //$mbrid, $spcid)
 	{
+		$justForMe = false;
 		if (PrivHelper::hasPriv('mha/member-specialty/crud', '0010') == false) {
-			if (Yii::$app->user->identity->usrID != $mbrid)
-				throw new ForbiddenHttpException('access denied');
+			$justForMe = true;
 		}
 
-		$model = $this->findModel($mbrid, $spcid);
-
+		$model = $this->findModel($id); //mbrid, $spcid);
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
+
+		if ($justForMe && ($model->mbrspcMemberID != Yii::$app->user->id))
+			throw new ForbiddenHttpException('access denied');
 
 		if ($model->save() == false)
 			throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
@@ -152,33 +169,37 @@ class MemberSpecialtyController extends BaseRestController
 		return [
 			// 'result' => [
 				// 'message' => 'updated',
-				'mbrUserID' => $model->mbrUserID,
-				'mbrStatus' => $model->mbrStatus,
-				'mbrUpdatedAt' => $model->mbrUpdatedAt,
-				'mbrUpdatedBy' => $model->mbrUpdatedBy,
+				// 'mbrUserID' => $model->mbrUserID,
+				// 'mbrStatus' => $model->mbrStatus,
+				'mbrspcUpdatedAt' => $model->mbrspcUpdatedAt,
+				'mbrspcUpdatedBy' => $model->mbrspcUpdatedBy,
 			// ],
 		];
 	}
 
-	public function actionDelete($mbrid, $spcid)
+	public function actionDelete($id) //mbrid, $spcid)
 	{
+		$justForMe = false;
 		if (PrivHelper::hasPriv('mha/member-specialty/crud', '0001') == false) {
-			if (Yii::$app->user->identity->usrID != $mbrid)
-				throw new ForbiddenHttpException('access denied');
+			$justForMe = true;
 		}
 
-		$model = $this->findModel($mbrid, $spcid);
+		$model = $this->findModel($id); //mbrid, $spcid);
+
+		if ($justForMe && ($model->mbrspcMemberID != Yii::$app->user->id))
+			throw new ForbiddenHttpException('access denied');
 
 		if ($model->delete() === false)
 			throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));
 
 		return [
+			'result' => 'ok',
 			// 'result' => [
 				// 'message' => 'deleted',
-				'mbrUserID' => $model->mbrUserID,
-				'mbrStatus' => $model->mbrStatus,
-				'mbrRemovedAt' => $model->mbrRemovedAt,
-				'mbrRemovedBy' => $model->mbrRemovedBy,
+				// 'mbrspcUserID' => $model->mbrspcUserID,
+				// 'mbrspcStatus' => $model->mbrspcStatus,
+				// 'mbrspcRemovedAt' => $model->mbrspcRemovedAt,
+				// 'mbrspcRemovedBy' => $model->mbrspcRemovedBy,
 			// ],
 		];
 	}

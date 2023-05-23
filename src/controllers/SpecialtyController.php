@@ -35,12 +35,14 @@ class SpecialtyController extends BaseRestController
 		throw new NotFoundHttpException('The requested item not exist.');
 	}
 
-	public function actionIndex($parentid = null, $q = null)
-	{
-		PrivHelper::checkPriv('mha/specialty/crud', '0100');
+	public function actionIndex(
+		$parentid = null,
+		$q = null
+	) {
+		// PrivHelper::checkPriv('mha/specialty/crud', '0100');
 
-		$nodeAlias = 'node';
 		$tableName = SpecialtyModel::tableName();
+		$nodeAlias = $tableName; //'node';
 
 		if (empty($q) == false) {
 			$query = SpecialtyModel::find();
@@ -50,7 +52,10 @@ class SpecialtyController extends BaseRestController
 			$query = SpecialtyModel::find()
 				->andWhere($nodeAlias . '.spcID = ' . $nodeAlias . '.spcRoot');
 		else {
-			$model = $this->findModel($parentid);
+			// $model = $this->findModel($parentid);
+			$model = SpecialtyModel::find()
+				->andWhere([$nodeAlias . '.spcID' => $parentid])
+				->one();
 
 			// $query = $model->children(1);
 
@@ -67,9 +72,12 @@ class SpecialtyController extends BaseRestController
 			];
 			$query = SpecialtyModel::find()
 				->andWhere($condition)
-				->addOrderBy([$nodeAlias . '.spcLeft' => SORT_ASC])
 			;
 		}
+
+		$query = $query
+			->addOrderBy([$nodeAlias . '.spcLeft' => SORT_ASC])
+		;
 
 		$query = $query
 			// ->select(SpecialtyModel::selectableColumns($nodeAlias))
@@ -104,8 +112,9 @@ class SpecialtyController extends BaseRestController
 			return [];
 		}
 
+		$models = $dataProvider->getModels();
 		return [
-			'data' => $dataProvider->getModels(),
+			'data' => $models,
 			// 'pagination' => [
 			// 	'totalCount' => $totalCount,
 			// ],
@@ -114,14 +123,17 @@ class SpecialtyController extends BaseRestController
 
 	public function actionView($id)
 	{
-		PrivHelper::checkPriv('mha/specialty/crud', '0100');
+		// PrivHelper::checkPriv('mha/specialty/crud', '0100');
+
+		$tableName = SpecialtyModel::tableName();
+		$nodeAlias = $tableName; //'node';
 
 		$model = SpecialtyModel::find()
 			// ->select(SpecialtyModel::selectableColumns())
 			// ->with('createdByUser')
 			// ->with('updatedByUser')
 			// ->with('removedByUser')
-			->where(['node.spcID' => $id])
+			->where([$nodeAlias . '.spcID' => $id])
 			->asArray()
 			->one()
 		;
@@ -143,6 +155,9 @@ class SpecialtyController extends BaseRestController
 			throw new NotFoundHttpException("parameters not provided");
 
 		try {
+			if (empty($model->spcDescFieldType))
+				$model->spcDescFieldLabel = null;
+
 			if ($parentid == null)
 				$done = $model->makeRoot();
 			else {
@@ -183,6 +198,9 @@ class SpecialtyController extends BaseRestController
 
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
+
+		if (empty($model->spcDescFieldType))
+			$model->spcDescFieldLabel = null;
 
 		if ($model->save() == false)
 			throw new UnprocessableEntityHttpException(implode("\n", $model->getFirstErrors()));

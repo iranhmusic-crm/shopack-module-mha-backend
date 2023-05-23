@@ -41,12 +41,12 @@ class MemberMasterInsDocHistoryController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-master-ins-doc/crud', '0100') == false)
-			$filter = ['mbrminsdocMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrminsdocMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberMasterInsDocHistoryModel;
 		$query = $searchModel::find()
 			->select(MemberMasterInsDocHistoryModel::selectableColumns())
-			->with('memberMasterInsDoc.member.user')
+			->joinWith('memberMasterInsDoc.member.user')
 			->asArray()
 		;
 
@@ -84,14 +84,14 @@ class MemberMasterInsDocHistoryController extends BaseRestController
 
 		$model = MemberMasterInsDocHistoryModel::find()
 			->select(MemberMasterInsDocHistoryModel::selectableColumns())
-			->with('memberMasterInsDoc.member.user')
+			->joinWith('memberMasterInsDoc.member.user')
 			->andWhere(['mbrminsdochstID' => $id])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -113,7 +113,7 @@ class MemberMasterInsDocHistoryController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		try {
@@ -148,7 +148,7 @@ class MemberMasterInsDocHistoryController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->save() == false)
@@ -174,7 +174,7 @@ class MemberMasterInsDocHistoryController extends BaseRestController
 
 		$model = $this->findModel($id);
 
-		if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrminsdochstMasterInsDocID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->delete() === false)

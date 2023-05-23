@@ -41,13 +41,13 @@ class MemberDocumentController extends BaseRestController
 	{
 		$filter = [];
 		if (PrivHelper::hasPriv('mha/member-document/crud', '0100') == false)
-			$filter = ['mbrdocMemberID' => Yii::$app->user->identity->usrID];
+			$filter = ['mbrdocMemberID' => Yii::$app->user->id];
 
 		$searchModel = new MemberDocumentModel;
 		$query = $searchModel::find()
 			->select(MemberDocumentModel::selectableColumns())
-			->with('member.user')
-			->with('document')
+			->joinWith('member.user')
+			->joinWith('document')
 			->asArray()
 		;
 
@@ -84,15 +84,15 @@ class MemberDocumentController extends BaseRestController
 
 		$model = MemberDocumentModel::find()
 			->select(MemberDocumentModel::selectableColumns())
-			->with('member.user')
-			->with('document')
+			->joinWith('member.user')
+			->joinWith('document')
 			->andWhere(['mbrdocID' => $id])
 			->asArray()
 			->one()
 		;
 
 		if ($model !== null) {
-			if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->identity->usrID))
+			if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->id))
 				throw new ForbiddenHttpException('access denied');
 
 			return $model;
@@ -114,7 +114,7 @@ class MemberDocumentController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		try {
@@ -150,7 +150,7 @@ class MemberDocumentController extends BaseRestController
 		if ($model->load(Yii::$app->request->getBodyParams(), '') == false)
 			throw new NotFoundHttpException("parameters not provided");
 
-		if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->save() == false)
@@ -176,7 +176,7 @@ class MemberDocumentController extends BaseRestController
 
 		$model = $this->findModel($id);
 
-		if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->identity->usrID))
+		if ($justForMe && ($model->mbrdocMemberID != Yii::$app->user->id))
 			throw new ForbiddenHttpException('access denied');
 
 		if ($model->delete() === false)

@@ -18,7 +18,7 @@ class SpecialtyModel extends MhaActiveRecord
   public function initSoftDelete()
   {
     $this->softdelete_RemovedStatus  = enuSpecialtyStatus::Removed;
-    $this->softdelete_StatusField    = 'spcStatus';
+    // $this->softdelete_StatusField    = 'spcStatus';
     $this->softdelete_RemovedAtField = 'spcRemovedAt';
     $this->softdelete_RemovedByField = 'spcRemovedBy';
 	}
@@ -59,11 +59,11 @@ class SpecialtyModel extends MhaActiveRecord
 
 	public static function find()
 	{
-		$nodeAlias = 'node';
 		$tableName = self::tableName();
+		$nodeAlias = $tableName; //'node';
 
 		$query = (new SpecialtyModelQuery(get_called_class()))
-			->alias($nodeAlias)
+			// ->alias($nodeAlias)
 			->select(SpecialtyModel::selectableColumns($nodeAlias))
 			->with('createdByUser')
 			->with('updatedByUser')
@@ -72,7 +72,7 @@ class SpecialtyModel extends MhaActiveRecord
 
 		// fullName
 		$query
-			->addSelect(new \yii\db\Expression("CONCAT(REPEAT('.    ', " . $nodeAlias . ".spcLevel), GROUP_CONCAT(parent.spcName ORDER BY parent.spcLeft SEPARATOR ' >> ')) AS fullName"))
+			->addSelect(new \yii\db\Expression("CONCAT(REPEAT('----', " . $nodeAlias . ".spcLevel), ' ', GROUP_CONCAT(parent.spcName ORDER BY parent.spcLeft SEPARATOR ' >> ')) AS fullName"))
 			->join('CROSS JOIN', $tableName . ' parent')
 			->andWhere($nodeAlias . '.spcRoot = parent.spcRoot')
 			->andWhere($nodeAlias . '.spcLeft BETWEEN parent.spcLeft AND parent.spcRight')
@@ -87,5 +87,13 @@ class SpecialtyModel extends MhaActiveRecord
 	public function getUser() {
 		return $this->hasOne(UserModel::class, ['usrID' => 'spcID']);
 	}
+
+	public function save($runValidation = true, $attributeNames = null)
+  {
+		if (empty($this->spcDescFieldType) && (empty($this->spcDescFieldLabel) == false))
+			$this->spcDescFieldLabel = null;
+
+    return parent::save($runValidation, $attributeNames);
+  }
 
 }

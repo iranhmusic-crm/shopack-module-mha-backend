@@ -20,7 +20,7 @@ class MembershipModel extends MhaActiveRecord implements ISaleableEntity
   public function initSoftDelete()
   {
     $this->softdelete_RemovedStatus  = enuMembershipStatus::Removed;
-    $this->softdelete_StatusField    = 'mshpStatus';
+    // $this->softdelete_StatusField    = 'mshpStatus';
     $this->softdelete_RemovedAtField = 'mshpRemovedAt';
     $this->softdelete_RemovedByField = 'mshpRemovedBy';
 	}
@@ -59,7 +59,7 @@ class MembershipModel extends MhaActiveRecord implements ISaleableEntity
 
 		//get saleable info
 		list ($startDate, $endDate, $years, $unitPrice, $totalPrice, $saleableID)
-			= MemberMembershipModel::getRenewalInfo(Yii::$app->user->identity->usrID);
+			= MemberMembershipModel::getRenewalInfo(Yii::$app->user->id);
 
 		//todo: check user langauge from request header
 		$desc = 'عضویت خانه موسیقی از '
@@ -72,13 +72,19 @@ class MembershipModel extends MhaActiveRecord implements ISaleableEntity
 		;
 
 		$params = [
-			'userid'		=> Yii::$app->user->identity->usrID,
+			'userid'		=> Yii::$app->user->id,
 			'service'		=> Yii::$app->controller->module->id,
 			'slbkey'		=> self::saleableKey(),
 			'slbid'			=> $saleableID,
 			'desc' 			=> $desc,
-			'unitprice' => $unitPrice,
 			'qty'				=> $years,
+			'unitprice' => $unitPrice,
+			'slbinfo'		=> [
+				'startDate' => $startDate,
+				'endDate' => $endDate,
+			],
+			'maxqty'		=> $years,
+			'qtystep'		=> 0, //0: do not allow to change qty in basket
 		];
 		$data = json_encode($params);
 
@@ -87,7 +93,7 @@ class MembershipModel extends MhaActiveRecord implements ISaleableEntity
 		else
 			$data = RsaPrivate::model(Yii::$app->controller->module->servicePrivateKey)->encrypt($data);
 
-		list ($resultStatus, $resultData) = HttpHelper::callApi('aaa/basket/add',
+		list ($resultStatus, $resultData) = HttpHelper::callApi('aaa/basket/item',
 			HttpHelper::METHOD_POST,
 			[],
 			[
@@ -97,9 +103,33 @@ class MembershipModel extends MhaActiveRecord implements ISaleableEntity
 		);
 
 		if ($resultStatus < 200 || $resultStatus >= 300)
-			throw new \Exception(Yii::t('mha', $resultData['message'], $resultData));
+			throw new \yii\web\HttpException($resultStatus, Yii::t('mha', $resultData['message'], $resultData));
 
 		return $resultData;
+	}
+
+	public static function ProcessVoucherItem($voucherItemdata)
+	{
+		$userid			= $voucherItemdata['userid'];
+		$service		= $voucherItemdata['service'];
+		$slbkey			= $voucherItemdata['slbkey'];
+		$slbid			= $voucherItemdata['slbid'];
+		$desc				= $voucherItemdata['desc'];
+		$qty				= $voucherItemdata['qty'];
+		$unitprice	= $voucherItemdata['unitprice'];
+    //additives
+    //discount
+    //tax
+    //totalprice
+		$startDate	= $voucherItemdata['slbinfo']['startDate'];
+		$endDate		= $voucherItemdata['slbinfo']['endDate'];
+
+		$memberMembershipModel = new MemberMembershipModel;
+		$memberMembershipModel->mbrshpMemberID			= $userid;
+		$memberMembershipModel->mbrshpMembershipID	= $slbid;
+		$memberMembershipModel->mbrshpStartDate			= $startDate;
+		$memberMembershipModel->mbrshpEndDate				= $endDate;
+		return $memberMembershipModel->save();
 	}
 
 }

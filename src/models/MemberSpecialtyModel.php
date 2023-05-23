@@ -5,10 +5,7 @@
 
 namespace iranhmusic\shopack\mha\backend\models;
 
-use Yii;
 use iranhmusic\shopack\mha\backend\classes\MhaActiveRecord;
-use iranhmusic\shopack\mha\backend\models\MemberModel;
-use iranhmusic\shopack\mha\backend\models\SpecialtyModel;
 
 class MemberSpecialtyModel extends MhaActiveRecord
 {
@@ -26,18 +23,10 @@ class MemberSpecialtyModel extends MhaActiveRecord
 				'class' => \shopack\base\common\behaviors\RowDatesAttributesBehavior::class,
 				'createdAtAttribute' => 'mbrspcCreatedAt',
 				'createdByAttribute' => 'mbrspcCreatedBy',
-				// 'updatedAtAttribute' => 'mbrspcUpdatedAt',
-				// 'updatedByAttribute' => 'mbrspcUpdatedBy',
+				'updatedAtAttribute' => 'mbrspcUpdatedAt',
+				'updatedByAttribute' => 'mbrspcUpdatedBy',
 			],
 		];
-	}
-
-	public function getMember() {
-		return $this->hasOne(MemberModel::class, ['mbrUserID' => 'mbrspcMemberID']);
-	}
-
-	public function getSpecialty() {
-		return $this->hasOne(SpecialtyModel::class, ['spcID' => 'mbrspcSpecialtyID']);
 	}
 
 }

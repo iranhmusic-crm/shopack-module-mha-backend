@@ -37,8 +37,38 @@ class Module
 				[
 					'class' => \yii\rest\UrlRule::class,
 					// 'prefix' => 'v1',
+					'controller' => [$this->id . '/basic-definition'],
+					'pluralize' => false,
+				],
+				[
+					'class' => \yii\rest\UrlRule::class,
+					// 'prefix' => 'v1',
+					'controller' => [$this->id . '/service'],
+					'pluralize' => false,
+
+					// 'tokens' => [
+					// 	'{uuid}' => '<uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}>',
+					// ],
+
+					'patterns' => [
+						// 'GET,HEAD'					=> 'index',
+						// 'GET,HEAD {uuid}'		=> 'view',
+						// 'POST'							=> 'create',
+						// 'PUT,PATCH {uuid}'	=> 'update',
+						// 'DELETE {uuid}'			=> 'delete',
+						// '{uuid}'						=> 'options',
+						// ''									=> 'options',
+						'POST process-voucher-item' => 'process-voucher-item',
+					],
+				],
+				[
+					'class' => \yii\rest\UrlRule::class,
+					// 'prefix' => 'v1',
 					'controller' => [$this->id . '/member'],
 					'pluralize' => false,
+					'extraPatterns' => [
+						'POST signup' => 'signup',
+					],
 				],
 				[
 					'class' => \yii\rest\UrlRule::class,
@@ -112,6 +142,10 @@ class Module
 					// 'prefix' => 'v1',
 					'controller' => [$this->id . '/kanoon'],
 					'pluralize' => false,
+
+					'extraPatterns' => [
+						'POST send-message' => 'send-message',
+					],
 				],
 				[
 					'class' => \yii\rest\UrlRule::class,
